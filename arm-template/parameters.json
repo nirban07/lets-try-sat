@@ -12,10 +12,10 @@
         "value": "Standard_LRS"
     },
       "serverfarms_ASP_letstrysat_8985_name": {
-          "value": "serverfarm-name-final"
+          "value": "ASP-letstrysat-8985"
       },
       "userAssignedIdentities_trying_sat_one_id_ae51_name": {
-          "value": "server-user-assigned-identity"
+          "value": "trying-sat-one-id-ae51"
       }
   }
 }
