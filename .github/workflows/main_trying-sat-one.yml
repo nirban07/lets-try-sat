@@ -59,14 +59,12 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_3CD6DD9AD258424D874EBA82B0BFC475 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_E81D083F05704AF7A3E9199D7F4A43B3 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C0D3C8DD2683495ABBD7FFA0DA19082E }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy ARM template
         uses: azure/arm-deploy@v1
         with:
-          subscriptionId: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C0D3C8DD2683495ABBD7FFA0DA19082E }}
+          subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
           resourceGroupName: "lets-try-sat"
           template: ./arm-template/template.json  # path to your ARM template
           parameters: ./arm-template/parameters.json  # optional: parameter file path
