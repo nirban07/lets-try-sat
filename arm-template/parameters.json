@@ -3,22 +3,19 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
       "sites_trying_sat_one_name": {
-          "value": null
+          "value": "trying-sat-one"
       },
       "components_trying_sat_one_name": {
-          "value": null
+          "value": "trying-sat-one"
       },
       "storageAccountType": {
         "value": "Standard_LRS"
     },
       "serverfarms_ASP_letstrysat_8985_name": {
-          "value": null
+          "value": "serverfarm-name-final"
       },
       "userAssignedIdentities_trying_sat_one_id_ae51_name": {
-          "value": null
-      },
-      "workspaces_DefaultWorkspace_621cec32_fab8_4552_ab21_d48ea699fe04_CCAN_externalid": {
-          "value": null
+          "value": "server-user-assigned-identity"
       }
   }
 }
