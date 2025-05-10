@@ -1,0 +1,756 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "sites_trying_sat_one_name": {
+          "defaultValue": "trying-sat-one",
+          "type": "String"
+      },
+      "components_trying_sat_one_name": {
+          "defaultValue": "trying-sat-one",
+          "type": "String"
+      },
+      "storageAccountType": {
+        "type": "string",
+        "defaultValue": "Standard_LRS",
+        "allowedValues": [
+          "Standard_LRS",
+          "Standard_GRS",
+          "Standard_RAGRS"
+        ],
+        "metadata": {
+          "description": "Storage Account type"
+        }
+      },
+      "location": {
+        "type": "string",
+        "defaultValue": "[resourceGroup().location]",
+        "metadata": {
+          "description": "Location for all resources."
+        }
+      },
+      "serverfarms_ASP_letstrysat_8985_name": {
+          "defaultValue": "ASP-letstrysat-8985",
+          "type": "String"
+      },
+      "userAssignedIdentities_trying_sat_one_id_ae51_name": {
+          "defaultValue": "trying-sat-one-id-ae51",
+          "type": "String"
+      },
+      "workspaces_DefaultWorkspace_621cec32_fab8_4552_ab21_d48ea699fe04_CCAN_externalid": {
+          "defaultValue": "/subscriptions/621cec32-fab8-4552-ab21-d48ea699fe04/resourceGroups/DefaultResourceGroup-CCAN/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-621cec32-fab8-4552-ab21-d48ea699fe04-CCAN",
+          "type": "String"
+      }
+  },
+  "variables": {
+    "storageAccountName": "[format('{0}azfunctions', uniqueString(resourceGroup().id))]"
+  },
+  "resources": [
+      {
+          "type": "microsoft.insights/components",
+          "apiVersion": "2020-02-02",
+          "name": "[parameters('components_trying_sat_one_name')]",
+          "location": "canadacentral",
+          "kind": "web",
+          "properties": {
+              "Application_Type": "web",
+              "Flow_Type": "Redfield",
+              "Request_Source": "IbizaWebAppExtensionCreate",
+              "RetentionInDays": 90,
+              "WorkspaceResourceId": "[parameters('workspaces_DefaultWorkspace_621cec32_fab8_4552_ab21_d48ea699fe04_CCAN_externalid')]",
+              "IngestionMode": "LogAnalytics",
+              "publicNetworkAccessForIngestion": "Enabled",
+              "publicNetworkAccessForQuery": "Enabled",
+              "DisableLocalAuth": false
+          }
+      },
+      {
+          "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+          "apiVersion": "2025-01-31-preview",
+          "name": "[parameters('userAssignedIdentities_trying_sat_one_id_ae51_name')]",
+          "location": "canadacentral"
+      },
+      {
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "2022-05-01",
+        "name": "[variables('storageAccountName')]",
+        "location": "[parameters('location')]",
+        "sku": {
+          "name": "[parameters('storageAccountType')]"
+        },
+        "kind": "Storage"
+      },
+      {
+          "type": "Microsoft.Web/serverfarms",
+          "apiVersion": "2024-04-01",
+          "name": "[parameters('serverfarms_ASP_letstrysat_8985_name')]",
+          "location": "Canada Central",
+          "sku": {
+              "name": "Y1",
+              "tier": "Dynamic",
+              "size": "Y1",
+              "family": "Y",
+              "capacity": 0
+          },
+          "kind": "functionapp",
+          "properties": {
+              "perSiteScaling": false,
+              "elasticScaleEnabled": false,
+              "maximumElasticWorkerCount": 1,
+              "isSpot": false,
+              "reserved": false,
+              "isXenon": false,
+              "hyperV": false,
+              "targetWorkerCount": 0,
+              "targetWorkerSizeId": 0,
+              "zoneRedundant": false
+          }
+      },
+      {
+          "type": "microsoft.insights/components/ProactiveDetectionConfigs",
+          "apiVersion": "2018-05-01-preview",
+          "name": "[concat(parameters('components_trying_sat_one_name'), '/degradationindependencyduration')]",
+          "location": "canadacentral",
+          "dependsOn": [
+              "[resourceId('microsoft.insights/components', parameters('components_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "ruleDefinitions": {
+                  "Name": "degradationindependencyduration",
+                  "DisplayName": "Degradation in dependency duration",
+                  "Description": "Smart Detection rules notify you of performance anomaly issues.",
+                  "HelpUrl": "https://docs.microsoft.com/en-us/azure/application-insights/app-insights-proactive-performance-diagnostics",
+                  "IsHidden": false,
+                  "IsEnabledByDefault": true,
+                  "IsInPreview": false,
+                  "SupportsEmailNotifications": true
+              },
+              "enabled": true,
+              "sendEmailsToSubscriptionOwners": true,
+              "customEmails": []
+          }
+      },
+      {
+          "type": "microsoft.insights/components/ProactiveDetectionConfigs",
+          "apiVersion": "2018-05-01-preview",
+          "name": "[concat(parameters('components_trying_sat_one_name'), '/degradationinserverresponsetime')]",
+          "location": "canadacentral",
+          "dependsOn": [
+              "[resourceId('microsoft.insights/components', parameters('components_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "ruleDefinitions": {
+                  "Name": "degradationinserverresponsetime",
+                  "DisplayName": "Degradation in server response time",
+                  "Description": "Smart Detection rules notify you of performance anomaly issues.",
+                  "HelpUrl": "https://docs.microsoft.com/en-us/azure/application-insights/app-insights-proactive-performance-diagnostics",
+                  "IsHidden": false,
+                  "IsEnabledByDefault": true,
+                  "IsInPreview": false,
+                  "SupportsEmailNotifications": true
+              },
+              "enabled": true,
+              "sendEmailsToSubscriptionOwners": true,
+              "customEmails": []
+          }
+      },
+      {
+          "type": "microsoft.insights/components/ProactiveDetectionConfigs",
+          "apiVersion": "2018-05-01-preview",
+          "name": "[concat(parameters('components_trying_sat_one_name'), '/digestMailConfiguration')]",
+          "location": "canadacentral",
+          "dependsOn": [
+              "[resourceId('microsoft.insights/components', parameters('components_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "ruleDefinitions": {
+                  "Name": "digestMailConfiguration",
+                  "DisplayName": "Digest Mail Configuration",
+                  "Description": "This rule describes the digest mail preferences",
+                  "HelpUrl": "www.homail.com",
+                  "IsHidden": true,
+                  "IsEnabledByDefault": true,
+                  "IsInPreview": false,
+                  "SupportsEmailNotifications": true
+              },
+              "enabled": true,
+              "sendEmailsToSubscriptionOwners": true,
+              "customEmails": []
+          }
+      },
+      {
+          "type": "microsoft.insights/components/ProactiveDetectionConfigs",
+          "apiVersion": "2018-05-01-preview",
+          "name": "[concat(parameters('components_trying_sat_one_name'), '/extension_billingdatavolumedailyspikeextension')]",
+          "location": "canadacentral",
+          "dependsOn": [
+              "[resourceId('microsoft.insights/components', parameters('components_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "ruleDefinitions": {
+                  "Name": "extension_billingdatavolumedailyspikeextension",
+                  "DisplayName": "Abnormal rise in daily data volume (preview)",
+                  "Description": "This detection rule automatically analyzes the billing data generated by your application, and can warn you about an unusual increase in your application's billing costs",
+                  "HelpUrl": "https://github.com/Microsoft/ApplicationInsights-Home/tree/master/SmartDetection/billing-data-volume-daily-spike.md",
+                  "IsHidden": false,
+                  "IsEnabledByDefault": true,
+                  "IsInPreview": true,
+                  "SupportsEmailNotifications": false
+              },
+              "enabled": true,
+              "sendEmailsToSubscriptionOwners": true,
+              "customEmails": []
+          }
+      },
+      {
+          "type": "microsoft.insights/components/ProactiveDetectionConfigs",
+          "apiVersion": "2018-05-01-preview",
+          "name": "[concat(parameters('components_trying_sat_one_name'), '/extension_canaryextension')]",
+          "location": "canadacentral",
+          "dependsOn": [
+              "[resourceId('microsoft.insights/components', parameters('components_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "ruleDefinitions": {
+                  "Name": "extension_canaryextension",
+                  "DisplayName": "Canary extension",
+                  "Description": "Canary extension",
+                  "HelpUrl": "https://github.com/Microsoft/ApplicationInsights-Home/blob/master/SmartDetection/",
+                  "IsHidden": true,
+                  "IsEnabledByDefault": true,
+                  "IsInPreview": true,
+                  "SupportsEmailNotifications": false
+              },
+              "enabled": true,
+              "sendEmailsToSubscriptionOwners": true,
+              "customEmails": []
+          }
+      },
+      {
+          "type": "microsoft.insights/components/ProactiveDetectionConfigs",
+          "apiVersion": "2018-05-01-preview",
+          "name": "[concat(parameters('components_trying_sat_one_name'), '/extension_exceptionchangeextension')]",
+          "location": "canadacentral",
+          "dependsOn": [
+              "[resourceId('microsoft.insights/components', parameters('components_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "ruleDefinitions": {
+                  "Name": "extension_exceptionchangeextension",
+                  "DisplayName": "Abnormal rise in exception volume (preview)",
+                  "Description": "This detection rule automatically analyzes the exceptions thrown in your application, and can warn you about unusual patterns in your exception telemetry.",
+                  "HelpUrl": "https://github.com/Microsoft/ApplicationInsights-Home/blob/master/SmartDetection/abnormal-rise-in-exception-volume.md",
+                  "IsHidden": false,
+                  "IsEnabledByDefault": true,
+                  "IsInPreview": true,
+                  "SupportsEmailNotifications": false
+              },
+              "enabled": true,
+              "sendEmailsToSubscriptionOwners": true,
+              "customEmails": []
+          }
+      },
+      {
+          "type": "microsoft.insights/components/ProactiveDetectionConfigs",
+          "apiVersion": "2018-05-01-preview",
+          "name": "[concat(parameters('components_trying_sat_one_name'), '/extension_memoryleakextension')]",
+          "location": "canadacentral",
+          "dependsOn": [
+              "[resourceId('microsoft.insights/components', parameters('components_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "ruleDefinitions": {
+                  "Name": "extension_memoryleakextension",
+                  "DisplayName": "Potential memory leak detected (preview)",
+                  "Description": "This detection rule automatically analyzes the memory consumption of each process in your application, and can warn you about potential memory leaks or increased memory consumption.",
+                  "HelpUrl": "https://github.com/Microsoft/ApplicationInsights-Home/tree/master/SmartDetection/memory-leak.md",
+                  "IsHidden": false,
+                  "IsEnabledByDefault": true,
+                  "IsInPreview": true,
+                  "SupportsEmailNotifications": false
+              },
+              "enabled": true,
+              "sendEmailsToSubscriptionOwners": true,
+              "customEmails": []
+          }
+      },
+      {
+          "type": "microsoft.insights/components/ProactiveDetectionConfigs",
+          "apiVersion": "2018-05-01-preview",
+          "name": "[concat(parameters('components_trying_sat_one_name'), '/extension_securityextensionspackage')]",
+          "location": "canadacentral",
+          "dependsOn": [
+              "[resourceId('microsoft.insights/components', parameters('components_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "ruleDefinitions": {
+                  "Name": "extension_securityextensionspackage",
+                  "DisplayName": "Potential security issue detected (preview)",
+                  "Description": "This detection rule automatically analyzes the telemetry generated by your application and detects potential security issues.",
+                  "HelpUrl": "https://github.com/Microsoft/ApplicationInsights-Home/blob/master/SmartDetection/application-security-detection-pack.md",
+                  "IsHidden": false,
+                  "IsEnabledByDefault": true,
+                  "IsInPreview": true,
+                  "SupportsEmailNotifications": false
+              },
+              "enabled": true,
+              "sendEmailsToSubscriptionOwners": true,
+              "customEmails": []
+          }
+      },
+      {
+          "type": "microsoft.insights/components/ProactiveDetectionConfigs",
+          "apiVersion": "2018-05-01-preview",
+          "name": "[concat(parameters('components_trying_sat_one_name'), '/extension_traceseveritydetector')]",
+          "location": "canadacentral",
+          "dependsOn": [
+              "[resourceId('microsoft.insights/components', parameters('components_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "ruleDefinitions": {
+                  "Name": "extension_traceseveritydetector",
+                  "DisplayName": "Degradation in trace severity ratio (preview)",
+                  "Description": "This detection rule automatically analyzes the trace logs emitted from your application, and can warn you about unusual patterns in the severity of your trace telemetry.",
+                  "HelpUrl": "https://github.com/Microsoft/ApplicationInsights-Home/blob/master/SmartDetection/degradation-in-trace-severity-ratio.md",
+                  "IsHidden": false,
+                  "IsEnabledByDefault": true,
+                  "IsInPreview": true,
+                  "SupportsEmailNotifications": false
+              },
+              "enabled": true,
+              "sendEmailsToSubscriptionOwners": true,
+              "customEmails": []
+          }
+      },
+      {
+          "type": "microsoft.insights/components/ProactiveDetectionConfigs",
+          "apiVersion": "2018-05-01-preview",
+          "name": "[concat(parameters('components_trying_sat_one_name'), '/longdependencyduration')]",
+          "location": "canadacentral",
+          "dependsOn": [
+              "[resourceId('microsoft.insights/components', parameters('components_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "ruleDefinitions": {
+                  "Name": "longdependencyduration",
+                  "DisplayName": "Long dependency duration",
+                  "Description": "Smart Detection rules notify you of performance anomaly issues.",
+                  "HelpUrl": "https://docs.microsoft.com/en-us/azure/application-insights/app-insights-proactive-performance-diagnostics",
+                  "IsHidden": false,
+                  "IsEnabledByDefault": true,
+                  "IsInPreview": false,
+                  "SupportsEmailNotifications": true
+              },
+              "enabled": true,
+              "sendEmailsToSubscriptionOwners": true,
+              "customEmails": []
+          }
+      },
+      {
+          "type": "microsoft.insights/components/ProactiveDetectionConfigs",
+          "apiVersion": "2018-05-01-preview",
+          "name": "[concat(parameters('components_trying_sat_one_name'), '/migrationToAlertRulesCompleted')]",
+          "location": "canadacentral",
+          "dependsOn": [
+              "[resourceId('microsoft.insights/components', parameters('components_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "ruleDefinitions": {
+                  "Name": "migrationToAlertRulesCompleted",
+                  "DisplayName": "Migration To Alert Rules Completed",
+                  "Description": "A configuration that controls the migration state of Smart Detection to Smart Alerts",
+                  "HelpUrl": "https://docs.microsoft.com/en-us/azure/application-insights/app-insights-proactive-performance-diagnostics",
+                  "IsHidden": true,
+                  "IsEnabledByDefault": false,
+                  "IsInPreview": true,
+                  "SupportsEmailNotifications": false
+              },
+              "enabled": false,
+              "sendEmailsToSubscriptionOwners": true,
+              "customEmails": []
+          }
+      },
+      {
+          "type": "microsoft.insights/components/ProactiveDetectionConfigs",
+          "apiVersion": "2018-05-01-preview",
+          "name": "[concat(parameters('components_trying_sat_one_name'), '/slowpageloadtime')]",
+          "location": "canadacentral",
+          "dependsOn": [
+              "[resourceId('microsoft.insights/components', parameters('components_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "ruleDefinitions": {
+                  "Name": "slowpageloadtime",
+                  "DisplayName": "Slow page load time",
+                  "Description": "Smart Detection rules notify you of performance anomaly issues.",
+                  "HelpUrl": "https://docs.microsoft.com/en-us/azure/application-insights/app-insights-proactive-performance-diagnostics",
+                  "IsHidden": false,
+                  "IsEnabledByDefault": true,
+                  "IsInPreview": false,
+                  "SupportsEmailNotifications": true
+              },
+              "enabled": true,
+              "sendEmailsToSubscriptionOwners": true,
+              "customEmails": []
+          }
+      },
+      {
+          "type": "microsoft.insights/components/ProactiveDetectionConfigs",
+          "apiVersion": "2018-05-01-preview",
+          "name": "[concat(parameters('components_trying_sat_one_name'), '/slowserverresponsetime')]",
+          "location": "canadacentral",
+          "dependsOn": [
+              "[resourceId('microsoft.insights/components', parameters('components_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "ruleDefinitions": {
+                  "Name": "slowserverresponsetime",
+                  "DisplayName": "Slow server response time",
+                  "Description": "Smart Detection rules notify you of performance anomaly issues.",
+                  "HelpUrl": "https://docs.microsoft.com/en-us/azure/application-insights/app-insights-proactive-performance-diagnostics",
+                  "IsHidden": false,
+                  "IsEnabledByDefault": true,
+                  "IsInPreview": false,
+                  "SupportsEmailNotifications": true
+              },
+              "enabled": true,
+              "sendEmailsToSubscriptionOwners": true,
+              "customEmails": []
+          }
+      },
+      {
+          "type": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials",
+          "apiVersion": "2025-01-31-preview",
+          "name": "[concat(parameters('userAssignedIdentities_trying_sat_one_id_ae51_name'), '/y2riyr7ufovrw')]",
+          "dependsOn": [
+              "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentities_trying_sat_one_id_ae51_name'))]"
+          ],
+          "properties": {
+              "issuer": "https://token.actions.githubusercontent.com",
+              "subject": "repo:nirban07/lets-try-sat:ref:refs/heads/main",
+              "audiences": [
+                  "api://AzureADTokenExchange"
+              ]
+          }
+      },
+      {
+          "type": "Microsoft.Web/sites",
+          "apiVersion": "2024-04-01",
+          "name": "[parameters('sites_trying_sat_one_name')]",
+          "location": "Canada Central",
+          "dependsOn": [
+              "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_letstrysat_8985_name'))]"
+          ],
+          "tags": {
+              "hidden-link: /app-insights-resource-id": "/subscriptions/621cec32-fab8-4552-ab21-d48ea699fe04/resourceGroups/lets-try-sat/providers/microsoft.insights/components/trying-sat-one",
+              "hidden-link: /app-insights-instrumentation-key": "5510729a-7a3b-4349-be26-34bdbbd9459f",
+              "hidden-link: /app-insights-conn-string": "InstrumentationKey=5510729a-7a3b-4349-be26-34bdbbd9459f;IngestionEndpoint=https://canadacentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://canadacentral.livediagnostics.monitor.azure.com/;ApplicationId=d4d60fcc-87fc-4fbb-a71e-b5048dc6a0e1"
+          },
+          "kind": "functionapp",
+          "identity": {
+              "type": "SystemAssigned"
+          },
+          "properties": {
+              "enabled": true,
+              "hostNameSslStates": [
+                  {
+                      "name": "[concat(parameters('sites_trying_sat_one_name'), '.azurewebsites.net')]",
+                      "sslState": "Disabled",
+                      "hostType": "Standard"
+                  },
+                  {
+                      "name": "[concat(parameters('sites_trying_sat_one_name'), '.scm.azurewebsites.net')]",
+                      "sslState": "Disabled",
+                      "hostType": "Repository"
+                  }
+              ],
+              "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_ASP_letstrysat_8985_name'))]",
+              "reserved": false,
+              "isXenon": false,
+              "hyperV": false,
+              "dnsConfiguration": {},
+              "vnetRouteAllEnabled": false,
+              "vnetImagePullEnabled": false,
+              "vnetContentShareEnabled": false,
+              "siteConfig": {
+                "appSettings": [
+              {
+                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value": "[reference(resourceId('Microsoft.Insights/components', parameters('sites_trying_sat_one_name')), '2020-02-02').InstrumentationKey]"
+              },
+              {
+                "name": "AzureWebJobsStorage",
+                "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-09-01').keys[0].value)]"
+              },
+              {
+                "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-09-01').keys[0].value)]"
+              },
+              {
+                "name": "WEBSITE_CONTENTSHARE",
+                "value": "[toLower(parameters('sites_trying_sat_one_name'))]"
+              },
+              {
+                "name": "FUNCTIONS_EXTENSION_VERSION",
+                "value": "~4"
+              },
+              {
+                "name": "FUNCTIONS_WORKER_RUNTIME",
+                "value": "node"
+              },
+              {
+                "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                "value": "~14"
+              },
+              {
+                "name": "WEBSITE_RUN_FROM_PACKAGE",
+                "value": "1"
+              },
+              {
+                "name": "AZURE_SUBSCRIPTION_ID",
+                "value": "621cec32-fab8-4552-ab21-d48ea699fe04"
+              }
+            ],
+                  "numberOfWorkers": 1,
+                  "acrUseManagedIdentityCreds": false,
+                  "alwaysOn": false,
+                  "http20Enabled": false,
+                  "functionAppScaleLimit": 200,
+                  "minimumElasticInstanceCount": 0
+              },
+              "scmSiteAlsoStopped": false,
+              "clientAffinityEnabled": false,
+              "clientCertEnabled": false,
+              "clientCertMode": "Required",
+              "hostNamesDisabled": false,
+              "ipMode": "IPv4",
+              "vnetBackupRestoreEnabled": false,
+              "customDomainVerificationId": "8F1B65CE016F939D60A6484F64C341CB9E1500D162816F4F84097483BE5D413E",
+              "containerSize": 1536,
+              "dailyMemoryTimeQuota": 0,
+              "httpsOnly": true,
+              "endToEndEncryptionEnabled": false,
+              "redundancyMode": "None",
+              "publicNetworkAccess": "Enabled",
+              "storageAccountRequired": false,
+              "keyVaultReferenceIdentity": "SystemAssigned"
+          }
+      },
+      {
+          "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+          "apiVersion": "2024-04-01",
+          "name": "[concat(parameters('sites_trying_sat_one_name'), '/ftp')]",
+          "location": "Canada Central",
+          "dependsOn": [
+              "[resourceId('Microsoft.Web/sites', parameters('sites_trying_sat_one_name'))]"
+          ],
+          "tags": {
+              "hidden-link: /app-insights-resource-id": "/subscriptions/621cec32-fab8-4552-ab21-d48ea699fe04/resourceGroups/lets-try-sat/providers/microsoft.insights/components/trying-sat-one",
+              "hidden-link: /app-insights-instrumentation-key": "5510729a-7a3b-4349-be26-34bdbbd9459f",
+              "hidden-link: /app-insights-conn-string": "InstrumentationKey=5510729a-7a3b-4349-be26-34bdbbd9459f;IngestionEndpoint=https://canadacentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://canadacentral.livediagnostics.monitor.azure.com/;ApplicationId=d4d60fcc-87fc-4fbb-a71e-b5048dc6a0e1"
+          },
+          "properties": {
+              "allow": false
+          }
+      },
+      {
+          "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+          "apiVersion": "2024-04-01",
+          "name": "[concat(parameters('sites_trying_sat_one_name'), '/scm')]",
+          "location": "Canada Central",
+          "dependsOn": [
+              "[resourceId('Microsoft.Web/sites', parameters('sites_trying_sat_one_name'))]"
+          ],
+          "tags": {
+              "hidden-link: /app-insights-resource-id": "/subscriptions/621cec32-fab8-4552-ab21-d48ea699fe04/resourceGroups/lets-try-sat/providers/microsoft.insights/components/trying-sat-one",
+              "hidden-link: /app-insights-instrumentation-key": "5510729a-7a3b-4349-be26-34bdbbd9459f",
+              "hidden-link: /app-insights-conn-string": "InstrumentationKey=5510729a-7a3b-4349-be26-34bdbbd9459f;IngestionEndpoint=https://canadacentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://canadacentral.livediagnostics.monitor.azure.com/;ApplicationId=d4d60fcc-87fc-4fbb-a71e-b5048dc6a0e1"
+          },
+          "properties": {
+              "allow": false
+          }
+      },
+      {
+          "type": "Microsoft.Web/sites/config",
+          "apiVersion": "2024-04-01",
+          "name": "[concat(parameters('sites_trying_sat_one_name'), '/web')]",
+          "location": "Canada Central",
+          "dependsOn": [
+              "[resourceId('Microsoft.Web/sites', parameters('sites_trying_sat_one_name'))]"
+          ],
+          "tags": {
+              "hidden-link: /app-insights-resource-id": "/subscriptions/621cec32-fab8-4552-ab21-d48ea699fe04/resourceGroups/lets-try-sat/providers/microsoft.insights/components/trying-sat-one",
+              "hidden-link: /app-insights-instrumentation-key": "5510729a-7a3b-4349-be26-34bdbbd9459f",
+              "hidden-link: /app-insights-conn-string": "InstrumentationKey=5510729a-7a3b-4349-be26-34bdbbd9459f;IngestionEndpoint=https://canadacentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://canadacentral.livediagnostics.monitor.azure.com/;ApplicationId=d4d60fcc-87fc-4fbb-a71e-b5048dc6a0e1"
+          },
+          "properties": {
+              "numberOfWorkers": 1,
+              "defaultDocuments": [
+                  "Default.htm",
+                  "Default.html",
+                  "Default.asp",
+                  "index.htm",
+                  "index.html",
+                  "iisstart.htm",
+                  "default.aspx",
+                  "index.php"
+              ],
+              "netFrameworkVersion": "v6.0",
+              "requestTracingEnabled": false,
+              "remoteDebuggingEnabled": false,
+              "httpLoggingEnabled": false,
+              "acrUseManagedIdentityCreds": false,
+              "logsDirectorySizeLimit": 35,
+              "detailedErrorLoggingEnabled": false,
+              "publishingUsername": "REDACTED",
+              "scmType": "GitHubAction",
+              "use32BitWorkerProcess": true,
+              "webSocketsEnabled": false,
+              "alwaysOn": false,
+              "managedPipelineMode": "Integrated",
+              "virtualApplications": [
+                  {
+                      "virtualPath": "/",
+                      "physicalPath": "site\\wwwroot",
+                      "preloadEnabled": false
+                  }
+              ],
+              "loadBalancing": "LeastRequests",
+              "experiments": {
+                  "rampUpRules": []
+              },
+              "autoHealEnabled": false,
+              "vnetRouteAllEnabled": false,
+              "vnetPrivatePortsCount": 0,
+              "publicNetworkAccess": "Enabled",
+              "cors": {
+                  "allowedOrigins": [
+                      "https://portal.azure.com"
+                  ],
+                  "supportCredentials": false
+              },
+              "localMySqlEnabled": false,
+              "managedServiceIdentityId": 5082,
+              "ipSecurityRestrictions": [
+                  {
+                      "ipAddress": "Any",
+                      "action": "Allow",
+                      "priority": 2147483647,
+                      "name": "Allow all",
+                      "description": "Allow all access"
+                  }
+              ],
+              "scmIpSecurityRestrictions": [
+                  {
+                      "ipAddress": "Any",
+                      "action": "Allow",
+                      "priority": 2147483647,
+                      "name": "Allow all",
+                      "description": "Allow all access"
+                  }
+              ],
+              "scmIpSecurityRestrictionsUseMain": false,
+              "http20Enabled": false,
+              "minTlsVersion": "1.2",
+              "scmMinTlsVersion": "1.2",
+              "ftpsState": "FtpsOnly",
+              "preWarmedInstanceCount": 0,
+              "functionAppScaleLimit": 200,
+              "functionsRuntimeScaleMonitoringEnabled": false,
+              "minimumElasticInstanceCount": 0,
+              "azureStorageAccounts": {}
+          }
+      },
+      {
+          "type": "Microsoft.Web/sites/deployments",
+          "apiVersion": "2024-04-01",
+          "name": "[concat(parameters('sites_trying_sat_one_name'), '/4c6f24a24676437b91570a1ffe4f6ebf')]",
+          "location": "Canada Central",
+          "dependsOn": [
+              "[resourceId('Microsoft.Web/sites', parameters('sites_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "status": 4,
+              "author_email": "N/A",
+              "author": "N/A",
+              "deployer": "GITHUB_ZIP_DEPLOY_FUNCTIONS_V1",
+              "message": "{\"type\":\"deployment\",\"sha\":\"411d70c803822897cf41c85ff543b040006850b8\",\"repoName\":\"nirban07/lets-try-sat\",\"actor\":\"nirban07\",\"slotName\":\"production\"}",
+              "start_time": "2025-05-10T13:10:36.1628539Z",
+              "end_time": "2025-05-10T13:10:36.9284771Z",
+              "active": true
+          }
+      },
+      {
+          "type": "Microsoft.Web/sites/deployments",
+          "apiVersion": "2024-04-01",
+          "name": "[concat(parameters('sites_trying_sat_one_name'), '/c7ac9300b59e402bbb3bc2811c5a36f4')]",
+          "location": "Canada Central",
+          "dependsOn": [
+              "[resourceId('Microsoft.Web/sites', parameters('sites_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "status": 4,
+              "author_email": "N/A",
+              "author": "N/A",
+              "deployer": "GITHUB_ZIP_DEPLOY_FUNCTIONS_V1",
+              "message": "{\"type\":\"deployment\",\"sha\":\"83822ced80da10340a2f17dd901869d1568e364a\",\"repoName\":\"nirban07/lets-try-sat\",\"actor\":\"nirban07\",\"slotName\":\"production\"}",
+              "start_time": "2025-05-10T12:16:55.2835681Z",
+              "end_time": "2025-05-10T12:16:55.6429426Z",
+              "active": false
+          }
+      },
+      {
+          "type": "Microsoft.Web/sites/functions",
+          "apiVersion": "2024-04-01",
+          "name": "[concat(parameters('sites_trying_sat_one_name'), '/saturdayFunction')]",
+          "location": "Canada Central",
+          "dependsOn": [
+              "[resourceId('Microsoft.Web/sites', parameters('sites_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "script_href": "https://trying-sat-one.azurewebsites.net/admin/vfs/site/wwwroot/saturdayFunction.js",
+              "test_data_href": "https://trying-sat-one.azurewebsites.net/admin/vfs/data/Functions/sampledata/saturdayFunction.dat",
+              "href": "https://trying-sat-one.azurewebsites.net/admin/functions/saturdayFunction",
+              "config": {
+                  "name": "saturdayFunction",
+                  "entryPoint": "",
+                  "scriptFile": "saturdayFunction.js",
+                  "language": "node",
+                  "functionDirectory": "C:\\home\\site\\wwwroot\\src\\functions",
+                  "bindings": [
+                      {
+                          "methods": [
+                              "POST"
+                          ],
+                          "authLevel": "anonymous",
+                          "type": "httpTrigger",
+                          "name": "httpTrigger13c23c2cf5",
+                          "direction": "in"
+                      },
+                      {
+                          "type": "http",
+                          "name": "$return",
+                          "direction": "out"
+                      }
+                  ]
+              },
+              "invoke_url_template": "https://trying-sat-one.azurewebsites.net/api/saturdayfunction",
+              "language": "node",
+              "isDisabled": false
+          }
+      },
+      {
+          "type": "Microsoft.Web/sites/hostNameBindings",
+          "apiVersion": "2024-04-01",
+          "name": "[concat(parameters('sites_trying_sat_one_name'), '/', parameters('sites_trying_sat_one_name'), '.azurewebsites.net')]",
+          "location": "Canada Central",
+          "dependsOn": [
+              "[resourceId('Microsoft.Web/sites', parameters('sites_trying_sat_one_name'))]"
+          ],
+          "properties": {
+              "siteName": "trying-sat-one",
+              "hostNameType": "Verified"
+          }
+      }
+  ]
+}

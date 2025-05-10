@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "sites_trying_sat_one_name": {
+          "value": null
+      },
+      "components_trying_sat_one_name": {
+          "value": null
+      },
+      "storageAccountType": {
+        "value": "Standard_LRS"
+    },
+      "serverfarms_ASP_letstrysat_8985_name": {
+          "value": null
+      },
+      "userAssignedIdentities_trying_sat_one_id_ae51_name": {
+          "value": null
+      },
+      "workspaces_DefaultWorkspace_621cec32_fab8_4552_ab21_d48ea699fe04_CCAN_externalid": {
+          "value": null
+      }
+  }
+}
