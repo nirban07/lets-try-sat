@@ -66,7 +66,7 @@ jobs:
       - name: Deploy ARM template
         uses: azure/arm-deploy@v1
         with:
-          subscriptionId: ${{ fromJson(secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C0D3C8DD2683495ABBD7FFA0DA19082E)}}
+          subscriptionId: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C0D3C8DD2683495ABBD7FFA0DA19082E }}
           resourceGroupName: "lets-try-sat"
           template: ./arm-template/template.json  # path to your ARM template
           parameters: ./arm-template/parameters.json  # optional: parameter file path
