@@ -500,7 +500,7 @@
               },
               {
                 "name": "WEBSITE_NODE_DEFAULT_VERSION",
-                "value": "~14"
+                "value": "~20"
               },
               {
                 "name": "WEBSITE_RUN_FROM_PACKAGE",
